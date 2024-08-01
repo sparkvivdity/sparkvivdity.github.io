@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLACEHOLDER</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            position: relative; /* Ensure positioning context for mouse trail */
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .centered-text {
+            font-size: calc(2rem + 4vw);
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: red;
+            animation: flash var(--flash-duration, 1.5s) infinite;
+            z-index: -1;
+            transition: animation-duration 0.1s;
+        }
+
+        @keyframes flash {
+            0% { background-color: red; }
+            14% { background-color: orange; }
+            28% { background-color: yellow; }
+            42% { background-color: green; }
+            57% { background-color: blue; }
+            71% { background-color: indigo; }
+            85% { background-color: violet; }
+            100% { background-color: red; }
+        }
+
+        .trail {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.7);
+            width: 10px;
+            height: 10px;
+            transform: translate(-50%, -50%);
+            animation: trail-animation 1.5s ease-out forwards;
+        }
+
+        @keyframes trail-animation {
+            from {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(3) translateY(calc(-1 * var(--move-y))) translateX(calc(-1 * var(--move-x)));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="centered-text" id="dynamic-text">PLACEHOLDER</p>
+    </div>
+
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        function updatePageTitleAndText() {
+            const text = getQueryParam('n_');
+            if (text) {
+                const decodedText = decodeURIComponent(text);
+                document.getElementById('dynamic-text').textContent = decodedText;
+                document.title = decodedText; // Update the page title
+            }
+        }
+
+        function updateFont(fontName) {
+            if (fontName) {
+                // Apply the new font-family to the body
+                document.body.style.fontFamily = fontName;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePageTitleAndText();
+
+            // Update font if 'f_' query parameter is present
+            const fontName = getQueryParam('f_');
+            if (fontName) {
+                updateFont(fontName);
+            }
+        });
+
+        let timeout;
+        const fastSpeed = '0.4s';
+        const normalSpeed = '1.5s';
+
+        document.addEventListener('mousemove', (e) => {
+            document.body.style.setProperty('--flash-duration', fastSpeed);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                document.body.style.setProperty('--flash-duration', normalSpeed);
+            }, 300);
+
+            createMouseTrail(e);
+        });
+
+        function createMouseTrail(e) {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            document.body.appendChild(trail);
+
+            const x = e.clientX;
+            const y = e.clientY;
+
+            // Set initial position
+            trail.style.left = `${x}px`;
+            trail.style.top = `${y}px`;
+
+            // Randomize movement directions
+            const randomX = Math.random() * 100 - 50; // Random X movement within [-50, 50]
+            const randomY = Math.random() * 100 - 50; // Random Y movement within [-50, 50]
+
+            // Set custom properties for animation
+            trail.style.setProperty('--move-x', randomX + 'px');
+            trail.style.setProperty('--move-y', randomY + 'px');
+        }
+    </script>
+</body>
+</html>
